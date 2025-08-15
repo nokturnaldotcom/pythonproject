@@ -47,6 +47,8 @@ question_bank = [
      "options": ["Mercury", "Venus", "Earth", "Mars"], "answer": "Mercury"}
 ]
 
+# Copy of questions that will be reduced as game goes on
+unused_questions = question_bank.copy()
 
 def ask_question(q_number, q_data):
     """Ask a single question and return True if correct."""
@@ -72,18 +74,24 @@ def ask_question(q_number, q_data):
 
     return selected_answer.lower() == q_data["answer"].lower()
 
-
 def play_quiz():
-    """Play the quiz game."""
+    """Play the quiz game without repeating questions until all are used."""
+    global unused_questions
     score = 0
-    selected_questions = random.sample(question_bank, 5)
 
-    for i, q_data in enumerate(selected_questions, start=1):
-        if ask_question(i, q_data):
+    if len(unused_questions) < 5:
+        print("\n🔄 All questions have been used. Resetting question bank.")
+        unused_questions = question_bank.copy()
+
+    selected_questions = random.sample(unused_questions, 5)
+
+    for q in selected_questions:
+        if ask_question(selected_questions.index(q) + 1, q):
             print("✅ Correct!")
             score += 1
         else:
-            print(f"❌ Incorrect! The correct answer was: {q_data['answer']}")
+            print(f"❌ Incorrect! The correct answer was: {q['answer']}")
+        unused_questions.remove(q)  # remove question so it won't repeat
 
     print(f"\nYour final score: {score}/5")
     name = input("Enter your name: ").strip()
@@ -91,19 +99,15 @@ def play_quiz():
     leaderboard[name] = score
     display_leaderboard()
 
-
 def display_leaderboard():
     """Display leaderboard sorted by score."""
     print("\n🏆 Leaderboard 🏆")
-    sorted_board = sorted(leaderboard.items(),
-                          key=lambda x: x[1], reverse=True)
+    sorted_board = sorted(leaderboard.items(), key=lambda x: x[1], reverse=True)
     for rank, (player, score) in enumerate(sorted_board, start=1):
         print(f"{rank}. {player} - {score} points")
 
-
 def main():
     """Main game loop."""
-    print(" ")
     print("=== Welcome to the Solar System Quiz Game ===")
     while True:
         play_quiz()
@@ -112,8 +116,8 @@ def main():
             print("Thanks for playing! Goodbye 👋")
             break
 
-
 if __name__ == "__main__":
     main()
 
 '''
+
